@@ -1,11 +1,16 @@
 #ifndef BOOKS
   #define BOOKS
   
+  #define CMDLEN 64
+  #define STRLEN 256
+  
   #include <stdint.h>
   #include "modules/text.h"
   
-  struct Book
-  {
+  // Useful marco for the CLI
+  #define command_is(S) !strcmp(text_lowercase(cmd), S)
+  
+  struct Book {
 	  char title[CMDLEN];
   	  char author[CMDLEN];
   	  char file[STRLEN];

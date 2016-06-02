@@ -1,1 +1,1 @@
-Program('books', ['books.c', 'modules/text.c'])
+Program('books', ['books.c', 'books_file.c', 'modules/text.c', 'modules/ints.c'])

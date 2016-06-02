@@ -2,8 +2,8 @@
 #include <string.h>
 #include <stdlib.h> // for malloc
 
-#define CMDLEN 64
 #include "books.h"
+#include "books_file.h"
 #include "modules/text.h"
 
 struct Book *getlastbook(struct Book *first);
@@ -70,16 +70,16 @@ int main()
 				int loop = 1;
 				while (loop)
 				{
-				printf(" %s | %s | %s | %s | %s \n", 
-					text_fill(i_to_str( current_book->book_id ), 4),
-					text_fill(current_book->title,				16),
-					text_fill(current_book->author,				10),
-					text_fill(getgenre(current_book->genre),	 7),
-					text_fill(current_book->file,				13)  );
+					printf(" %s | %s | %s | %s | %s \n", 
+						text_fill(i_to_str( current_book->book_id ), 4),
+						text_fill(current_book->title,				16),
+						text_fill(current_book->author,				10),
+						text_fill(getgenre(current_book->genre),	 7),
+						text_fill(current_book->file,				13)  );
 					
 					if (current_book->next == NULL)
 					{
-						loop = 0;
+					loop = 0;
 					}
 					else
 					{
@@ -169,6 +169,23 @@ int main()
 			
 		}
 		
+		if ( command_is("s") )
+		{
+			if (countBooks(first_book) > 65534)
+			{
+				printf("-> Collection of books is too large to store in a file. Sorry.");
+				continue;
+			}
+			
+			char address[STRLEN];
+			
+			printf(" Save as: ");
+			fgets(address, STRLEN, stdin);
+			denewline(address);
+			
+			books_file_write(first_book, address);
+		}
+		
 		if ( command_is("h") || command_is("help") )
 		{
 			printhelp();
@@ -189,6 +206,7 @@ void printhelp()
 	printf(" L = List all books\n");
 	printf(" D = List all books with details\n");
 	printf(" C = Count the number of books\n");
+	printf(" S = Save the collection to a file\n");
 	printf(" H = Help\n");
 	printf(" Q = Quit\n");
 }
