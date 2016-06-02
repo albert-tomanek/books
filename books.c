@@ -94,6 +94,19 @@ int main()
 		}
 		
 		
+		if ( command_is("c") )
+		{
+			if (first_book == NULL)
+			{
+				printf("-> There are no books in the collection.\n");
+			}
+			else
+			{
+				printf("-> The number of books in the collection is %d.\n", countBooks(first_book) );
+			}
+		}
+		
+		
 		if ( command_is("a") )
 		{
 			char title[CMDLEN];
@@ -173,10 +186,11 @@ int main()
 void printhelp()
 {
 	printf(" A = Add a new book\n");
-	printf(" L = list all books\n");
-	printf(" D = list all books with details\n");
-	printf(" H = help\n");
-	printf(" Q = quit\n");
+	printf(" L = List all books\n");
+	printf(" D = List all books with details\n");
+	printf(" C = Count the number of books\n");
+	printf(" H = Help\n");
+	printf(" Q = Quit\n");
 }
 
 char *getgenre(int genre)
