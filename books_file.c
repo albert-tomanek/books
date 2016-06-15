@@ -113,6 +113,8 @@ void books_file_write(struct Book *first_book, char *file)
 			current_book = current_book->next;
 		}
 	}
+	
+	fclose(out); 	// WHOOPS FORGOT THIS!
 }
 
 struct Book* books_file_read(char *file)

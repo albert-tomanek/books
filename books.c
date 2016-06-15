@@ -182,11 +182,22 @@ int main()
 				continue;
 			}
 			
-			char address[STRLEN];
+		  //char  address[STRLEN];
+			char* address = calloc(STRLEN, sizeof(char));
 			
 			printf(" Save as: ");
 			fgets(address, STRLEN, stdin);
 			denewline(address);
+			
+			if (! strcmp(text_getslice(strlen(address)-4, text_lowercase(address), 3), ".col") )
+			{
+				;  	//pass
+			}
+			else
+			{
+				address = text_append(".col", address);
+				printf(" Saved as '%s'.\n", address);
+			}
 			
 			books_file_write(first_book, address);
 		}
