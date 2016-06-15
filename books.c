@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h> // for malloc
+#include <assert.h>
 
 #include "books.h"
 #include "books_file.h"
@@ -29,8 +30,7 @@ int main()
 		fgets(cmd, CMDLEN, stdin);
 		denewline(cmd);
 		
-		
-		if ( command_is("l") )
+		if ( command_is("p") )
 		{
 			if (first_book) 	// If we actually have any books...
 			{
@@ -171,9 +171,14 @@ int main()
 		
 		if ( command_is("s") )
 		{
+			if (first_book == NULL)
+			{
+				printf("-> No books to save!\n");
+				continue;
+			}
 			if (countBooks(first_book) > 65534)
 			{
-				printf("-> Collection of books is too large to store in a file. Sorry.");
+				printf("-> Collection of books is too large to store in a .col file. Sorry.\n");
 				continue;
 			}
 			
@@ -184,6 +189,29 @@ int main()
 			denewline(address);
 			
 			books_file_write(first_book, address);
+		}
+		
+		if ( command_is("l") )
+		{
+			char address[STRLEN];
+			
+			printf(" Load: ");
+			fgets(address, STRLEN, stdin);
+			denewline(address);
+			
+			first_book = NULL;
+			
+			first_book = books_file_read(address);
+			
+			assert(first_book != NULL);
+			
+			bookCount = countBooks(first_book);
+		}
+		
+		if ( command_is("x") )
+		{
+			/* _MEMORY_LEAK_- FIX THIS*/
+			first_book = NULL;
 		}
 		
 		if ( command_is("h") || command_is("help") )
@@ -203,10 +231,21 @@ int main()
 void printhelp()
 {
 	printf(" A = Add a new book\n");
-	printf(" L = List all books\n");
-	printf(" D = List all books with details\n");
+	
+	printf(" \n");
+	
+	printf(" P = Print a list of all books\n");
+	printf(" D = Print a list of all books with details\n");
 	printf(" C = Count the number of books\n");
+	
+	printf(" \n");
+	
 	printf(" S = Save the collection to a file\n");
+	printf(" L = Load a collection from a file\n");
+	printf(" X = Delete the current collection\n");
+	
+	printf(" \n");
+	
 	printf(" H = Help\n");
 	printf(" Q = Quit\n");
 }
@@ -245,6 +284,8 @@ struct Book *getlastbook(struct Book *first)
 
 int countBooks(struct Book *first)
 {
+	assert(first != NULL);
+	
 	int count = 0;
 	
 	int loop = 1;

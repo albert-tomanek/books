@@ -1,6 +1,7 @@
 #ifndef BOOKS
   #define BOOKS
   
+  // Don't change these else you'll have trouble reading .col files.
   #define CMDLEN 64
   #define STRLEN 256
   
@@ -26,5 +27,7 @@
   // Functions
   struct Book *getlastbook(struct Book *first);
   int countBooks(struct Book *first);
+  
+  char *getgenre(int genre);
 
 #endif
