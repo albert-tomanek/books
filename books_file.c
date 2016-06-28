@@ -19,6 +19,7 @@
 
 #include "books_file.h"
 #include "modules/ints.h"
+#include "modules/dbg.h"
 
 #include <stdio.h>
 #include <stdint.h>
@@ -57,15 +58,17 @@ struct col_header
 
 void books_file_write(struct Book *first_book, char *file)
 {
+	check(first_book != NULL, "*first_book is a null pointer.");
+	
 	int bookCount = countBooks(first_book);
 	
-	assert(bookCount < 65535);
+	check(bookCount < 65535, "No more than 65534 books can be stored in a .col file.");
 	
 	uint8_t bookCount_bytes[2];
 	cvt16to8( (uint16_t) bookCount, bookCount_bytes);
 	
 	FILE *out = fopen(file, "w");
-	assert(out != NULL);
+	check(out != NULL, "-> Could not open file '%s'.", file);
 	
 	fputs("COLLECTION", out);
 	fputc(BOOKS_FILE_VERSION, out);
@@ -77,7 +80,7 @@ void books_file_write(struct Book *first_book, char *file)
 	
 	fputc(0x00, out); 		// padding
 	fputc(0x00, out);
-	
+
 
 	/** Writes each Book struct to the file.**/
 	
@@ -114,20 +117,30 @@ void books_file_write(struct Book *first_book, char *file)
 		}
 	}
 	
-	fclose(out); 	// WHOOPS FORGOT THIS!
+	fclose(out);
+	
+	return;
+
+error:
+	if (out			 )  fclose(out);
+	if (current_book ) 	free(current_book);
+	if (first_book   ) 	free(first_book);
+	return;
 }
 
 struct Book* books_file_read(char *file)
 {
 	FILE *in = fopen(file, "r");
-	//assert(in != NULL);
+	check(in != NULL, "-> Could not open file '%s'.", file);
+	
+	printf(" Reading file...   ");
 	
 	char mnumber[12]; 		//mnumber = magic number
 	fgets(mnumber, 13, in);		// 13 and not 12 because fgetc reads n-1 bytes and not n bytes.	
 	
 	if ( strcmp(mnumber, "COLLECTION\1"))
 	{
-		printf("-> ERROR: Wrong file format or version.");
+		printf("error.\n Wrong file format or version.\n");
 		return NULL;
 	}
 	
@@ -144,6 +157,12 @@ struct Book* books_file_read(char *file)
 	fgetc(in);
 	
 	// End of header.
+	
+	if (bookCount <= 0)
+	{
+		printf("done.\n No books in collection!\n");
+		return NULL;
+	}
 	
 	struct Book 	*current_book;
 	struct Book		*first_book;
@@ -177,10 +196,18 @@ struct Book* books_file_read(char *file)
 		fgetc(in);
 
 	}
+	printf("done.\n");
 	
 	current_book->next = NULL;
-	
+
 	return first_book;
+
+error:
+	
+	if (in			 )  fclose(in);
+	if (current_book ) 	free(current_book);
+	if (first_book   ) 	free(first_book);
+	return NULL;
 }
 
 

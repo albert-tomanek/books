@@ -6,10 +6,13 @@
 #include "books.h"
 #include "books_file.h"
 #include "modules/text.h"
+#include "modules/dbg.h"
 
 struct Book *getlastbook(struct Book *first);
 char *getgenre(int genre);
 char *i_to_str(int number);
+
+void freeBooks(struct Book *first);
 
 void printhelp();
 
@@ -30,7 +33,7 @@ int main()
 		fgets(cmd, CMDLEN, stdin);
 		denewline(cmd);
 		
-		if ( command_is("p") )
+		if ( command_is("l") )
 		{
 			if (first_book) 	// If we actually have any books...
 			{
@@ -117,6 +120,7 @@ int main()
 			int  genre;
 			
 			struct Book *current_book = calloc(1, sizeof(struct Book));
+			check(current_book != NULL , "calloc returned null pointer.");
 			
 			printf(" Book title: ");
 			fgets(title, CMDLEN, stdin);
@@ -195,6 +199,7 @@ int main()
 			}
 			else
 			{
+				printf("End 4 chars are '%s'.", text_getslice(strlen(address)-4, text_lowercase(address), 3));
 				address = text_append(".col", address);
 				printf(" Saved as '%s'.\n", address);
 			}
@@ -202,7 +207,7 @@ int main()
 			books_file_write(first_book, address);
 		}
 		
-		if ( command_is("l") )
+		if ( command_is("o") )
 		{
 			char address[STRLEN];
 			
@@ -210,18 +215,23 @@ int main()
 			fgets(address, STRLEN, stdin);
 			denewline(address);
 			
+			freeBooks(first_book);
 			first_book = NULL;
 			
 			first_book = books_file_read(address);
 			
-			assert(first_book != NULL);
+			/*
+			if (first_book == NULL) {
+				printf("failed.\n");
+				continue;
+			}	*/
 			
 			bookCount = countBooks(first_book);
 		}
 		
 		if ( command_is("x") )
 		{
-			/* _MEMORY_LEAK_- FIX THIS*/
+			freeBooks(first_book);
 			first_book = NULL;
 		}
 		
@@ -232,10 +242,15 @@ int main()
 		
 		if ( command_is("q") )
 		{
+			freeBooks(first_book);
 			loop = 0;
 		}
 	}
 	
+	return 0;
+	
+error:
+	if (first_book) 	freeBooks(first_book);
 	return 0;
 }
 
@@ -245,14 +260,14 @@ void printhelp()
 	
 	printf(" \n");
 	
-	printf(" P = Print a list of all books\n");
-	printf(" D = Print a list of all books with details\n");
+	printf(" L = List all books\n");
+	printf(" D = List all books with details\n");
 	printf(" C = Count the number of books\n");
 	
 	printf(" \n");
 	
-	printf(" S = Save the collection to a file\n");
-	printf(" L = Load a collection from a file\n");
+	printf(" S = Save the book collection to a file\n");
+	printf(" O = Open a book collection from a file\n");
 	printf(" X = Delete the current collection\n");
 	
 	printf(" \n");
@@ -275,27 +290,25 @@ char *getgenre(int genre)
 
 struct Book *getlastbook(struct Book *first)
 {
-	int loop = 1;
+	check(first != NULL, "Null-pointer to 'struct Book *first'");
+	
 	struct Book *current = first;
 	
-	while (loop)
+	while (current->next)
 	{
-		if(current->next == NULL)
-		{
-			loop = 0;
-		}
-		else
-		{
-			current = current->next;
-		}
+		current = current->next;
 	}
 	
 	return current;
+	
+error:
+	return first; 	//i.e. NULL
 }
 
 int countBooks(struct Book *first)
 {
-	assert(first != NULL);
+	//check(first != NULL, "Null-pointer to 'struct Book *first'");
+	if (! first) 	return 0;
 	
 	int count = 0;
 	
@@ -316,7 +329,35 @@ int countBooks(struct Book *first)
 	}
 	
 	return count;
+	
+error:
+	return 0;
 }
+
+void freeBooks(struct Book *first_book)
+{
+	struct Book *current_book = first_book;
+	struct Book *next;
+
+	if (! current_book)		// In case first_book is NULL or we are on the last book
+		return;
+	
+	while(current_book->next)
+	{
+		next = current_book->next;
+		
+		free(current_book);
+		
+		current_book = next;
+	}
+
+	free(current_book);
+	return;
+	
+error:
+	return;
+}
+
 
 char *i_to_str(int number)
 {
