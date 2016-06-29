@@ -27,6 +27,8 @@
 
 #include <byteswap.h>
 
+//#define checkend(F) if (feof(F)) break;	
+
 /*struct Book_chunk
 {
 	char title [CMDLEN]; 	// 64
@@ -150,8 +152,6 @@ struct Book* books_file_read(char *file)
 	bookCount_bytes[1] = fgetc(in);
 	
 	bookCount = cvt8to16(bookCount_bytes[0], bookCount_bytes[1]);
-	
-	//printf("Bookcount = %d\n", bookCount); 	// Ok, this works.
 	
 	fgetc(in); 		// Two bytes padding
 	fgetc(in);

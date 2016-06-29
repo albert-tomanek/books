@@ -12,6 +12,7 @@ struct Book *getlastbook(struct Book *first);
 char *getgenre(int genre);
 char *i_to_str(int number);
 
+void deleteBook(struct Book *first_book, int index);
 void freeBooks(struct Book *first);
 
 void printhelp();
@@ -82,7 +83,7 @@ int main()
 					
 					if (current_book->next == NULL)
 					{
-					loop = 0;
+						loop = 0;
 					}
 					else
 					{
@@ -173,6 +174,19 @@ int main()
 			
 		}
 		
+		if( command_is("r") )
+		{
+			int index;
+			char index_str[CMDLEN];
+			
+			printf(" Book index: ");
+			fgets(index_str, CMDLEN, stdin);
+			denewline(index_str);
+			index = atoi(index_str);
+			
+			deleteBook(first_book, index);
+		}
+		
 		if ( command_is("s") )
 		{
 			if (first_book == NULL)
@@ -193,13 +207,12 @@ int main()
 			fgets(address, STRLEN, stdin);
 			denewline(address);
 			
-			if (! strcmp(text_getslice(strlen(address)-4, text_lowercase(address), 3), ".col") )
+			if (! strcmp(text_getslice(strlen(address)-4, text_lowercase(address), 4), ".col") )
 			{
 				;  	//pass
 			}
 			else
 			{
-				printf("End 4 chars are '%s'.", text_getslice(strlen(address)-4, text_lowercase(address), 3));
 				address = text_append(".col", address);
 				printf(" Saved as '%s'.\n", address);
 			}
@@ -257,6 +270,7 @@ error:
 void printhelp()
 {
 	printf(" A = Add a new book\n");
+	printf(" R = Remove a book\n");
 	
 	printf(" \n");
 	
@@ -268,6 +282,9 @@ void printhelp()
 	
 	printf(" S = Save the book collection to a file\n");
 	printf(" O = Open a book collection from a file\n");
+	
+	printf(" \n");
+	
 	printf(" X = Delete the current collection\n");
 	
 	printf(" \n");
@@ -332,6 +349,35 @@ int countBooks(struct Book *first)
 	
 error:
 	return 0;
+}
+
+void deleteBook(struct Book *first_book, int index)
+
+void deleteBook(struct Book *first_book, int index)
+{	
+	struct Book *current_book = first_book;
+	struct Book *prev = NULL;
+	int bookCount = 0;
+
+	if (! current_book)		// In case first_book is NULL or we are on the last book
+		return;
+	
+	printf(" Deleting book #%d...   ", index);
+	
+	while(bookCount < index && current_book->next)
+	{
+		prev = current_book; 		// to keep the pointer; current_book will increment.
+		current_book = current_book->next;
+		bookCount++;
+	}
+	prev->next = current_book->next;
+	free(current_book);
+	
+	printf("done.\n");
+	return;
+	
+error:
+	return;
 }
 
 void freeBooks(struct Book *first_book)
