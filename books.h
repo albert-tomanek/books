@@ -1,6 +1,9 @@
 #ifndef BOOKS
   #define BOOKS
   
+  // Toggle printing of debug info...
+  //#define NODEBUG
+  
   // Don't change these else you'll have trouble reading .col files.
   #define CMDLEN 64
   #define STRLEN 256

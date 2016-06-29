@@ -12,7 +12,9 @@ struct Book *getlastbook(struct Book *first);
 char *getgenre(int genre);
 char *i_to_str(int number);
 
-void deleteBook(struct Book *first_book, int index);
+struct Book *getBook(struct Book *first_book, int search_id);
+
+void deleteBook(struct Book *first_book, struct Book *delete_book);
 void freeBooks(struct Book *first);
 
 void printhelp();
@@ -176,15 +178,17 @@ int main()
 		
 		if( command_is("r") )
 		{
-			int index;
-			char index_str[CMDLEN];
+			int  id;
+			char id_str[CMDLEN];
 			
-			printf(" Book index: ");
-			fgets(index_str, CMDLEN, stdin);
-			denewline(index_str);
-			index = atoi(index_str);
+			printf(" Book ID: ");
+			fgets(id_str, CMDLEN, stdin);
+			denewline(id_str);
+			id = atoi(id_str);
 			
-			deleteBook(first_book, index);
+			struct Book *del_book = getBook(first_book, id);	// Get the pointer to the book we want to delete,
+
+			deleteBook(first_book, del_book);
 		}
 		
 		if ( command_is("s") )
@@ -351,24 +355,56 @@ error:
 	return 0;
 }
 
-void deleteBook(struct Book *first_book, int index)
+struct Book *getBook(struct Book *first_book, int search_id)
+{
+	/* This function searches for a book
+	   with the given ID in the linked list given to it,
+		and will return a pointer to the book with that ID.
+		Returns NULL if not found.
+	*/
+	
+	struct Book *found = NULL;
+	
+	struct Book *current_book = first_book;
+	struct Book *next;
 
-void deleteBook(struct Book *first_book, int index)
+	if (! current_book)		// In case first_book is NULL or we are on the last book
+		return NULL;
+	
+	while(current_book->next)
+	{
+		next = current_book->next;
+		
+		if (current_book->book_id == search_id)
+		{
+			found = current_book;
+			break;
+		}
+		
+		current_book = next;
+	}
+
+	return found;
+	
+error:
+	return NULL;
+}
+
+void deleteBook(struct Book *first_book, struct Book *delete_book)
 {	
 	struct Book *current_book = first_book;
 	struct Book *prev = NULL;
-	int bookCount = 0;
 
-	if (! current_book)		// In case first_book is NULL or we are on the last book
+	if (! current_book || ! delete_book)		// In case first_book is NULL or we are on the last book
 		return;
 	
-	printf(" Deleting book #%d...   ", index);
+	printf(" Deleting book #%d...   ", delete_book->book_id);
 	
-	while(bookCount < index && current_book->next)
+	while(current_book->book_id != delete_book->book_id	&&
+		  current_book->next)
 	{
 		prev = current_book; 		// to keep the pointer; current_book will increment.
 		current_book = current_book->next;
-		bookCount++;
 	}
 	prev->next = current_book->next;
 	free(current_book);
