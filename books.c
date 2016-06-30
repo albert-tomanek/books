@@ -19,13 +19,41 @@ void freeBooks(struct Book *first);
 
 void printhelp();
 
-int main()
-{
-	printf(" -- Books -- \n");
-	
+int main(int argc, char *argv[])
+{	
 	struct Book *first_book = NULL;
 	
 	int bookCount = 0;
+	
+	printf(" -- Books -- \n");
+	
+	/* Handle commandline arguments */
+	if (argc > 1)
+	{
+		if (! strcmp(argv[1], "-h") || ! strcmp(argv[1], "--help"))
+		{
+			printf(" ./books [file.col]\n\n");
+			return 0;
+		}
+		else if (! strcmp(argv[1], "-v") || ! strcmp(argv[1], "--version"))
+		{
+			printf(" Books %s\n", BOOKS_VERSION);
+			printf(" Build %d\n\n", BOOKS_BUILD);
+			return 0;
+		}
+		else
+		{
+			char address[STRLEN];
+			strncpy(address, argv[1], STRLEN);
+			
+			first_book = books_file_read(address);
+			if (! first_book) {
+				printf("failed.\n");
+			}
+		}
+	}
+	
+	/* Main loop */
 	
 	char cmd[CMDLEN];
 	int loop = 1;
@@ -269,11 +297,10 @@ int main()
 			
 			first_book = books_file_read(address);
 			
-			/*
 			if (first_book == NULL) {
 				printf("failed.\n");
 				continue;
-			}	*/
+			}
 			
 			bookCount = countBooks(first_book);
 		}
@@ -284,7 +311,50 @@ int main()
 			first_book = NULL;
 		}
 		
+		if ( command_is("f") )
+		{
+			/* Search for a book */
+			
+			struct Book *current_book = first_book;
+			struct Book *next;
+			char search_string[STRLEN];
 
+			if (! first_book) {		// In case there are no books yet and first_book is NULL
+				printf(" No books to search!\n");
+				continue;
+			}
+			
+			printf(" Search string: ");
+			fgets(search_string, STRLEN, stdin);
+			denewline(search_string);
+				
+			//search_string = text_lowercase( search_string );	// To make it case-insensitive
+				
+			printf(" Searching %d books for '%s'...\n\n", countBooks(first_book), search_string);
+				
+			printf(" ID   | Title            | Author     | Genre   | Filename     \n");
+			printf("------+------------------+------------+---------+--------------\n");
+				
+			while(current_book)
+			{
+				next = current_book->next;
+							
+				if ( istrstr( text_lowercase(search_string), text_lowercase(current_book->title ) )  ||
+					 istrstr( text_lowercase(search_string), text_lowercase(current_book->author) )  ||
+					 istrstr( text_lowercase(search_string), text_lowercase(current_book->file  ) )  )
+				{
+					printf(" %s | %s | %s | %s | %s \n", 
+					text_fill(i_to_str( current_book->book_id ), 4),
+					text_fill(current_book->title,				16),
+					text_fill(current_book->author,				10),
+					text_fill(getgenre(current_book->genre),	 7),
+					text_fill(current_book->file,				13)  );
+					
+				}
+				
+				current_book = next;
+			}
+		}
 		
 		if ( command_is("h") || command_is("help") )
 		{
@@ -330,7 +400,7 @@ void printhelp()
 	printf(" \n");
 	
 	printf(" X = Delete the current collection\n");
-//	printf(" F = Find a book\n");
+	printf(" F = Find a book\n");
 	
 	printf(" \n");
 	

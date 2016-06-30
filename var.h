@@ -3,7 +3,7 @@
   
   // Do not edit the following two lines - they are used by process.py
   //build
-  #define BOOKS_BUILD 15
+  #define BOOKS_BUILD 32
   
   // Version name
   #define BOOKS_VERSION "v0.5 Development Beta"

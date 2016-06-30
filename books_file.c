@@ -132,10 +132,16 @@ error:
 
 struct Book* books_file_read(char *file)
 {
-	FILE *in = fopen(file, "r");
-	check(in != NULL, "-> Could not open file '%s'.", file);
-	
+	/* Variable declarations */
+	struct Book 	*current_book = NULL;
+	struct Book		*first_book   = NULL;
+
 	printf(" Reading file...   ");
+	
+	/* Opening the file */
+	FILE *in = fopen(file, "r");
+	//check(in != NULL, "Could not open file '%s'.", file);
+	if (! in) goto error;	// To replace check().
 	
 	char mnumber[12]; 		//mnumber = magic number
 	fgets(mnumber, 13, in);		// 13 and not 12 because fgetc reads n-1 bytes and not n bytes.	
@@ -163,9 +169,6 @@ struct Book* books_file_read(char *file)
 		printf("done.\n No books in collection!\n");
 		return NULL;
 	}
-	
-	struct Book 	*current_book;
-	struct Book		*first_book;
 	
 	for (int i = 0; i < bookCount; i++)
 	{
