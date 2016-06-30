@@ -1,6 +1,8 @@
 #ifndef BOOKS
   #define BOOKS
   
+  #include "var.h"	// Variable macros (eg. build no.)
+  
   // Toggle printing of debug info...
   //#define NODEBUG
   

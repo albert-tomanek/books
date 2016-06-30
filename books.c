@@ -176,7 +176,33 @@ int main()
 			
 		}
 		
-		if( command_is("r") )
+		if ( command_is("v") )		// View details
+		{
+			int  id;
+			char id_str[CMDLEN];
+			
+			printf(" Book ID: ");
+			fgets(id_str, CMDLEN, stdin);
+			denewline(id_str);
+			id = atoi(id_str);
+			
+			struct Book *view_book = getBook(first_book, id);	// Get the pointer to the book we want to delete,
+			
+			if (! view_book)
+			{
+				printf(" No book with ID #%d\n", id);
+				continue;
+			}
+			
+			printf(" Book title  = %s\n", view_book->title);
+			printf(" Book author = %s\n", view_book->author);
+			printf(" Book file   = %s\n", view_book->file);
+			printf(" Book genre  = %s\n", getgenre((int) view_book->genre));
+			printf(" \n");
+			printf(" Book ID     = %d\n", view_book->book_id);
+		}
+		
+		if ( command_is("r") )		// Remove a book
 		{
 			int  id;
 			char id_str[CMDLEN];
@@ -187,7 +213,13 @@ int main()
 			id = atoi(id_str);
 			
 			struct Book *del_book = getBook(first_book, id);	// Get the pointer to the book we want to delete,
-
+			
+			if (! del_book)
+			{
+				printf(" No book with ID #%d\n", id);
+				continue;
+			}
+			
 			deleteBook(first_book, del_book);
 		}
 		
@@ -252,6 +284,8 @@ int main()
 			first_book = NULL;
 		}
 		
+
+		
 		if ( command_is("h") || command_is("help") )
 		{
 			printhelp();
@@ -273,8 +307,14 @@ error:
 
 void printhelp()
 {
+	printf(" Books %s\n", BOOKS_VERSION);
+	printf(" Build %d\n", BOOKS_BUILD);
+	
+	printf(" \n");
+	
 	printf(" A = Add a new book\n");
 	printf(" R = Remove a book\n");
+	printf(" V = View details\n");
 	
 	printf(" \n");
 	
@@ -290,6 +330,7 @@ void printhelp()
 	printf(" \n");
 	
 	printf(" X = Delete the current collection\n");
+//	printf(" F = Find a book\n");
 	
 	printf(" \n");
 	
