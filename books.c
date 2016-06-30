@@ -14,8 +14,8 @@ char *i_to_str(int number);
 
 struct Book *getBook(struct Book *first_book, int search_id);
 
-void deleteBook(struct Book *first_book, struct Book *delete_book);
-void freeBooks(struct Book *first);
+void deleteBook(struct Book **first_book, struct Book *delete_book);	// Pointer-to-pointers because they will be changed in the function.
+void freeBooks(struct Book **first);
 
 void printhelp();
 
@@ -204,6 +204,74 @@ int main(int argc, char *argv[])
 			
 		}
 		
+		if ( command_is("m") || command_is("modify") )
+		{
+			/* Get the book ID */
+			
+			int  id;
+			char id_str[CMDLEN];
+			
+			printf(" Book ID: ");
+			fgets(id_str, CMDLEN, stdin);
+			denewline(id_str);
+			id = atoi(id_str);
+			
+			struct Book *mod_book = getBook(first_book, id);	// Get the pointer to the book we want to modify
+			
+			if (! mod_book)
+			{
+				printf(" No book with ID #%d\n", id);
+				continue;
+			}
+			
+			/* Modify the contents */
+			
+			printf(" Press RETURN to keep existing.\n");
+			
+			char title[CMDLEN];
+			char author[CMDLEN];
+			char file[STRLEN];
+			
+			char genre_str[CMDLEN];
+			int  genre;
+			
+			printf(" Book title ['%s']: ", mod_book->title);
+			fgets(title, CMDLEN, stdin);
+			denewline(title);
+			
+			printf(" Book author ['%s']: ", mod_book->author);
+			fgets(author, CMDLEN, stdin);
+			denewline(author);
+			
+			printf(" Filename ['%s']: ", mod_book->file);
+			fgets(file, CMDLEN, stdin);
+			denewline(file);
+			
+			/* Overwrite the current data if a different string is given. */
+			
+			if ( strlen(title ) > 0 )	strcpy(mod_book->title , title );
+			if ( strlen(author) > 0 )	strcpy(mod_book->author, author);
+			if ( strlen(file)   > 0 )	strcpy(mod_book->file  , file  );
+			
+			printf("\n\
+ Genres: 0 = Other,   \n\
+         1 = Mistery, \n\
+         2 = Comedy,  \n\
+         3 = Sciende, \n\
+         4 = Sci-fi,  \n\
+         5 = Fantasy  \n");
+			do
+			{
+				printf(" Book genre [%s](0-5): ", getgenre(mod_book->genre));
+				fgets(genre_str, CMDLEN, stdin);
+				denewline(genre_str);
+				genre = atoi(genre_str);
+			} while (genre > 5);
+			
+			if ( strlen(genre_str) > 0 )	mod_book->genre = genre;
+			
+		}
+		
 		if ( command_is("v") || command_is("view") )		// View details
 		{
 			int  id;
@@ -248,7 +316,7 @@ int main(int argc, char *argv[])
 				continue;
 			}
 			
-			deleteBook(first_book, del_book);
+			deleteBook(&first_book, del_book);
 		}
 		
 		if ( command_is("s") || command_is("save") )
@@ -292,8 +360,7 @@ int main(int argc, char *argv[])
 			fgets(address, STRLEN, stdin);
 			denewline(address);
 			
-			freeBooks(first_book);
-			first_book = NULL;
+			freeBooks(&first_book);
 			
 			first_book = books_file_read(address);
 			
@@ -307,8 +374,7 @@ int main(int argc, char *argv[])
 		
 		if ( command_is("x") || command_is("delete") )
 		{
-			freeBooks(first_book);
-			first_book = NULL;
+			freeBooks(&first_book);
 		}
 		
 		if ( command_is("f") || command_is("find") )
@@ -363,7 +429,7 @@ int main(int argc, char *argv[])
 		
 		if ( command_is("q") || command_is("quit") )
 		{
-			freeBooks(first_book);
+			freeBooks(&first_book);
 			loop = 0;
 		}
 	}
@@ -371,7 +437,7 @@ int main(int argc, char *argv[])
 	return 0;
 	
 error:
-	if (first_book) 	freeBooks(first_book);
+	if (first_book) 	freeBooks(&first_book);
 	return 0;
 }
 
@@ -384,6 +450,7 @@ void printhelp()
 	
 	printf(" A = Add a new book\n");
 	printf(" R = Remove a book\n");
+	printf(" M = Modify a book\n");
 	printf(" V = View details\n");
 	
 	printf(" \n");
@@ -482,7 +549,7 @@ struct Book *getBook(struct Book *first_book, int search_id)
 	if (! current_book)		// In case first_book is NULL or we are on the last book
 		return NULL;
 	
-	while(current_book->next)
+	while(current_book)
 	{
 		next = current_book->next;
 		
@@ -501,23 +568,33 @@ error:
 	return NULL;
 }
 
-void deleteBook(struct Book *first_book, struct Book *delete_book)
+void deleteBook(struct Book **first_book, struct Book *delete_book)
 {	
-	struct Book *current_book = first_book;
+	struct Book *current_book = *first_book;
 	struct Book *prev = NULL;
-
-	if (! current_book || ! delete_book)		// In case first_book is NULL or we are on the last book
-		return;
 	
 	printf(" Deleting book #%d...   ", delete_book->book_id);
+
+	if (! current_book || ! delete_book)		// In case first_book or delete_book is NULL
+	{
+		printf("error.\n");
+		return;
+	}
 	
+	/* Loop changing the pointers until current_book is delete_book, so that we get the book before */
 	while(current_book->book_id != delete_book->book_id	&&
 		  current_book->next)
 	{
 		prev = current_book; 		// to keep the pointer; current_book will increment.
 		current_book = current_book->next;
 	}
-	prev->next = current_book->next;
+	
+	if (prev) {
+		prev->next = current_book->next;
+	} else {
+		*first_book = NULL;
+	}
+	
 	free(current_book);
 	
 	printf("done.\n");
@@ -525,17 +602,17 @@ void deleteBook(struct Book *first_book, struct Book *delete_book)
 	
 error:
 	return;
-}
+} 
 
-void freeBooks(struct Book *first_book)
+void freeBooks(struct Book **first_book)	// Double-pointer because we will be changing the original pointer
 {
-	struct Book *current_book = first_book;
+	struct Book *current_book = *first_book;
 	struct Book *next;
 
 	if (! current_book)		// In case first_book is NULL or we are on the last book
 		return;
 	
-	while(current_book->next)
+	while(current_book)
 	{
 		next = current_book->next;
 		
@@ -544,7 +621,8 @@ void freeBooks(struct Book *first_book)
 		current_book = next;
 	}
 
-	free(current_book);
+	*first_book = NULL;		// Change it to null since the current pointer would be invalid
+	free(current_book);	
 	return;
 	
 error:

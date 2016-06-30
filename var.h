@@ -3,9 +3,9 @@
   
   // Do not edit the following two lines - they are used by process.py
   //build
-  #define BOOKS_BUILD 33
+  #define BOOKS_BUILD 38
   
   // Version name
-  #define BOOKS_VERSION "v0.7 Release Candidate 1"
+  #define BOOKS_VERSION "v0.75 Development Beta"
   
 #endif
