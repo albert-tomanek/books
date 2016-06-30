@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
 		fgets(cmd, CMDLEN, stdin);
 		denewline(cmd);
 		
-		if ( command_is("l") )
+		if ( command_is("l") || command_is("list") )
 		{
 			if (first_book) 	// If we actually have any books...
 			{
@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
 		}
 		
 		
-		if ( command_is("d") )
+		if ( command_is("d") || command_is("details") )
 		{
 			if (first_book) 	// If we actually have any books...
 			{
@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
 		}
 		
 		
-		if ( command_is("c") )
+		if ( command_is("c") || command_is("count") )
 		{
 			if (first_book == NULL)
 			{
@@ -141,7 +141,7 @@ int main(int argc, char *argv[])
 		}
 		
 		
-		if ( command_is("a") )
+		if ( command_is("a") || command_is("add") )
 		{
 			char title[CMDLEN];
 			char author[CMDLEN];
@@ -204,7 +204,7 @@ int main(int argc, char *argv[])
 			
 		}
 		
-		if ( command_is("v") )		// View details
+		if ( command_is("v") || command_is("view") )		// View details
 		{
 			int  id;
 			char id_str[CMDLEN];
@@ -230,7 +230,7 @@ int main(int argc, char *argv[])
 			printf(" Book ID     = %d\n", view_book->book_id);
 		}
 		
-		if ( command_is("r") )		// Remove a book
+		if ( command_is("r") || command_is("remove") )		// Remove a book
 		{
 			int  id;
 			char id_str[CMDLEN];
@@ -251,7 +251,7 @@ int main(int argc, char *argv[])
 			deleteBook(first_book, del_book);
 		}
 		
-		if ( command_is("s") )
+		if ( command_is("s") || command_is("save") )
 		{
 			if (first_book == NULL)
 			{
@@ -284,7 +284,7 @@ int main(int argc, char *argv[])
 			books_file_write(first_book, address);
 		}
 		
-		if ( command_is("o") )
+		if ( command_is("o") || command_is("open") )
 		{
 			char address[STRLEN];
 			
@@ -305,13 +305,13 @@ int main(int argc, char *argv[])
 			bookCount = countBooks(first_book);
 		}
 		
-		if ( command_is("x") )
+		if ( command_is("x") || command_is("delete") )
 		{
 			freeBooks(first_book);
 			first_book = NULL;
 		}
 		
-		if ( command_is("f") )
+		if ( command_is("f") || command_is("find") )
 		{
 			/* Search for a book */
 			
@@ -361,7 +361,7 @@ int main(int argc, char *argv[])
 			printhelp();
 		}
 		
-		if ( command_is("q") )
+		if ( command_is("q") || command_is("quit") )
 		{
 			freeBooks(first_book);
 			loop = 0;
