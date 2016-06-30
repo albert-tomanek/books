@@ -1,0 +1,13 @@
+BOOKS
+=====
+
+Books is a simple book cataloging program written in C by Albert Tomanek.
+It is currently in beta stage. The '.col' file format is described at the start of 'books_file.c'.
+This program is brought to you under the General Public License v3; for more info see 'LICENSE'.
+
+TODO:
+ - include a file picker
+ - implement the ability to export as XML
+
+If you have any queries, email me at electron826@gmail.com
+Also, feel free to visit my website at nebeska-rise.duckdns.org (08:00 - 20:00 GMT).
